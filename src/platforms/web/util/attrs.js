@@ -2,8 +2,12 @@
 
 import { makeMap } from 'shared/util'
 
+// these are reserved for web because they are directly compiled away
+// during template compilation
+export const isReservedAttr = makeMap('style,class')
+
 // attributes that should be using props for binding
-const acceptValue = makeMap('input,textarea,option,select')
+const acceptValue = makeMap('input,textarea,option,select,progress')
 export const mustUseProp = (tag: string, type: ?string, attr: string): boolean => {
   return (
     (attr === 'value' && acceptValue(tag)) && type !== 'button' ||
@@ -14,6 +18,17 @@ export const mustUseProp = (tag: string, type: ?string, attr: string): boolean =
 }
 
 export const isEnumeratedAttr = makeMap('contenteditable,draggable,spellcheck')
+
+const isValidContentEditableValue = makeMap('events,caret,typing,plaintext-only')
+
+export const convertEnumeratedValue = (key: string, value: any) => {
+  return isFalsyAttrValue(value) || value === 'false'
+    ? 'false'
+    // allow arbitrary string value for contenteditable
+    : key === 'contenteditable' && isValidContentEditableValue(value)
+      ? value
+      : 'true'
+}
 
 export const isBooleanAttr = makeMap(
   'allowfullscreen,async,autofocus,autoplay,checked,compact,controls,declare,' +

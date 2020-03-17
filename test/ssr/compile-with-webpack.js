@@ -1,9 +1,10 @@
 import path from 'path'
 import webpack from 'webpack'
-import MemoeryFS from 'memory-fs'
+import MemoryFS from 'memory-fs'
 
 export function compileWithWebpack (file, extraConfig, cb) {
   const config = Object.assign({
+    mode: 'development',
     entry: path.resolve(__dirname, 'fixtures', file),
     module: {
       rules: [
@@ -12,7 +13,11 @@ export function compileWithWebpack (file, extraConfig, cb) {
           loader: 'babel-loader'
         },
         {
-          test: /\.(png|woff2)$/,
+          test: /async-.*\.js$/,
+          loader: require.resolve('./async-loader')
+        },
+        {
+          test: /\.(png|woff2|css)$/,
           loader: 'file-loader',
           options: {
             name: '[name].[ext]'
@@ -23,7 +28,7 @@ export function compileWithWebpack (file, extraConfig, cb) {
   }, extraConfig)
 
   const compiler = webpack(config)
-  const fs = new MemoeryFS()
+  const fs = new MemoryFS()
   compiler.outputFileSystem = fs
 
   compiler.run((err, stats) => {
